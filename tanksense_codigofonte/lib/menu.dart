@@ -171,7 +171,7 @@ class Menu {
       // 🏢 CARREGAR EMPRESAS
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM empresa');
+            await dbConnection.connection!.query('SELECT * FROM empresa');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3 &&
@@ -188,7 +188,7 @@ class Menu {
       // 🏠 CARREGAR LOCAIS
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM local');
+            await dbConnection.connection!.query('SELECT * FROM local');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -207,7 +207,7 @@ class Menu {
       // ⚙️ CARREGAR DISPOSITIVOS
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM dispositivo');
+            await dbConnection.connection!.query('SELECT * FROM dispositivo');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -222,7 +222,7 @@ class Menu {
       // 📡 CARREGAR SENSORES
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM sensor');
+            await dbConnection.connection!.query('SELECT * FROM sensor');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -238,7 +238,7 @@ class Menu {
       // 🛢️ CARREGAR TANQUES
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM tanque');
+            await dbConnection.connection!.query('SELECT * FROM tanque');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 4) {
@@ -253,7 +253,7 @@ class Menu {
       // 👤 CARREGAR USUÁRIOS
       try {
         var resultados =
-            await dbConnection.query('SELECT * FROM usuario');
+            await dbConnection.connection!.query('SELECT * FROM usuario');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -333,7 +333,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO empresa (nome, cnpj) VALUES (?, ?)',
           [empresa.nome, empresa.cnpj],
         );
@@ -404,7 +404,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO local (nome, referencia, empresa_idEmpresa) VALUES (?, ?, ?)',
           [local.nome, local.referencia, empresaSelecionada.id],
         );
@@ -441,7 +441,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO dispositivo (modelo, status) VALUES (?, ?)',
           [dispositivo.modelo, dispositivo.status],
         );
@@ -505,7 +505,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO sensor (tipo, unidadeMedida, dispositivo_idDispositivo) VALUES (?, ?, ?)',
           [sensor.tipo, sensor.unidadeMedida, dispositivoSelecionado.id],
         );
@@ -602,7 +602,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO tanque (altura, volumeMax, volumeAtual, local_idLocal, dispositivo_idDispositivo) VALUES (?, ?, ?, ?, ?)',
           [
             tanque.altura,
@@ -695,7 +695,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           'INSERT INTO usuario (nome, email, senhaLogin, perfil, dataCriacao, ultimoLogin, empresa_idEmpresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
           [
             usuario.nome,
@@ -916,7 +916,7 @@ class Menu {
     final leituras = <Leitura>[];
 
     try {
-      final resultados = await dbConnection.query('''
+      final resultados = await dbConnection.connection!.query('''
         SELECT idLeitura, timestamp, distanciaCm, nivelCm, porcentagem, statusTanque 
         FROM leitura 
         ORDER BY timestamp DESC
@@ -993,7 +993,7 @@ class Menu {
       }
 
       try {
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           '''INSERT INTO leitura 
            (timestamp, distanciaCm, nivelCm, porcentagem, statusTanque, sensor_idSensor) 
            VALUES (?, ?, ?, ?, ?, ?)''',
@@ -1030,18 +1030,30 @@ class Menu {
       return;
     }
 
+    // Ordenar leituras por timestamp (mais antiga primeiro)
+    _leituras.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
     int sensorId = _sensores.isNotEmpty ? _sensores.first.id : 1;
     int producoesCriadas = 0;
+    double totalFioProduzido = 0.0;
+
+    print('📊 Analisando ${_leituras.length} leituras...');
 
     for (int i = 1; i < _leituras.length; i++) {
       final leituraAtual = _leituras[i];
       final leituraAnterior = _leituras[i - 1];
 
+      // Calcular variação percentual (quanto o nível baixou)
       double variacaoPercentual =
           leituraAnterior.porcentagem - leituraAtual.porcentagem;
 
+      // 🔥 LÓGICA SIMPLES: 1% de variação = 1 metro de fio
+      // Só produz se o tanque abaixou (variação positiva)
       if (variacaoPercentual > 0) {
+        // Converter porcentagem para metros de fio (1% = 1 metro)
         double metrosFio = variacaoPercentual;
+
+        totalFioProduzido += metrosFio;
 
         int novoId = _producoes.isEmpty
             ? 1
@@ -1049,40 +1061,61 @@ class Menu {
 
         final producao = Producao(
           novoId,
-          1,
+          1, // tanqueId
           leituraAtual.timestamp,
           metrosFio,
           'Automática',
-          'Leitura $i: ${variacaoPercentual.toStringAsFixed(2)}% = ${metrosFio.toStringAsFixed(2)}m de fio',
+          'Variação: ${variacaoPercentual.toStringAsFixed(2)}% (${leituraAnterior.porcentagem.toStringAsFixed(1)}% → ${leituraAtual.porcentagem.toStringAsFixed(1)}%)',
         );
 
         _producoes.add(producao);
         producoesCriadas++;
 
+        print('✅ Produção $novoId: ${metrosFio.toStringAsFixed(2)}m de fio');
+        print('   📉 Variação: ${variacaoPercentual.toStringAsFixed(2)}%');
+
+        // Salvar no banco se conectado - APENAS COLUNAS EXISTENTES
         if (_conectado) {
           try {
             String dataFormatada = _formatarDataParaMySQL(producao.dataHora);
 
-            await dbConnection.query(
+            await dbConnection.connection!.query(
               'INSERT INTO producao (quantidade, timestamp, sensor_idSensor) VALUES (?, ?, ?)',
-              [producao.quantidade, dataFormatada, sensorId],
+              [
+                producao.quantidade,
+                dataFormatada,
+                sensorId,
+              ],
             );
-            print(
-                '✅ Produção $novoId: ${metrosFio.toStringAsFixed(2)}m de fio');
+            print('   💾 Salva no banco');
           } catch (e) {
-            print('❌ Erro ao salvar produção $novoId: $e');
+            print('   ❌ Erro ao salvar produção: $e');
           }
         }
+      } else {
+        // Se o tanque não abaixou ou manteve o nível
+        final diferencaMinutos = leituraAtual.timestamp
+            .difference(leituraAnterior.timestamp)
+            .inMinutes;
+        print(
+            '📭 Sem produção: ${leituraAnterior.porcentagem.toStringAsFixed(1)}% → ${leituraAtual.porcentagem.toStringAsFixed(1)}% (${diferencaMinutos}min)');
       }
     }
 
+    // Ordenar produções por data (mais recente primeiro)
+    _producoes.sort((a, b) => b.dataHora.compareTo(a.dataHora));
+
+    print('\n🎯 RESULTADO DO CÁLCULO:');
+    print('✅ Produções criadas: $producoesCriadas');
+    print(
+        '📊 Total de fio produzido: ${totalFioProduzido.toStringAsFixed(2)} metros');
+
     if (producoesCriadas > 0) {
-      print('✅ $producoesCriadas produção(ões) calculada(s) com sucesso!');
-      double totalFio =
-          _producoes.map((p) => p.quantidade).reduce((a, b) => a + b);
-      print('📊 Total de fio produzido: ${totalFio.toStringAsFixed(2)} metros');
+      print('\n📈 ÚLTIMA PRODUÇÃO CALCULADA:');
+      _producoes.first.exibirDados();
     } else {
-      print('📭 Nenhuma produção calculada - sem variações no nível do tanque');
+      print(
+          '\n📭 Nenhuma produção calculada - o nível do tanque não abaixou entre as leituras');
     }
   }
 
@@ -1117,7 +1150,7 @@ class Menu {
       try {
         String dataFormatada = _formatarDataParaMySQL(producao.dataHora);
 
-        await dbConnection.query(
+        await dbConnection.connection!.query(
           '''INSERT INTO producao 
            (quantidade, timestamp, sensor_idSensor) 
            VALUES (?, ?, ?)''',

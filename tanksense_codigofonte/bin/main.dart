@@ -7,7 +7,7 @@ void main() async {
     host: 'localhost',
     porta: 3306,
     usuario: 'root',
-    senha: 'unifeob@123',
+    senha: '@#Hrk15072006',
     dbName: 'tanksense',
   );
 
@@ -23,4 +23,3 @@ void main() async {
     await db.close();
   }
 }
-
