@@ -2,13 +2,14 @@
 import 'entidade_base.dart';
 
 class Local extends EntidadeBase {
-  String nome;
-  String referencia;
+  final String _nome;
+  final String _referencia;
   final List<String> _caracteristicas = [];
 
-  Local(super.id, this.nome, this.referencia);
+  Local(super.id, this._nome, this._referencia);
 
-  // ENCAPSULAMENTO: Apenas para a lista de características
+  String get nome => _nome;
+  String get referencia => _referencia;
   List<String> get caracteristicas => List.unmodifiable(_caracteristicas);
 
   @override
@@ -16,8 +17,8 @@ class Local extends EntidadeBase {
     print('🏠 DADOS DO LOCAL');
     print('─' * 30);
     print('ID: $id');
-    print('Nome: $nome');
-    print('Referência: $referencia');
+    print('Nome: $_nome');
+    print('Referência: $_referencia');
     print('Características: ${_caracteristicas.length}');
     print('Tipo: ${obterTipo()}');
     print('─' * 30);
@@ -65,8 +66,8 @@ class Local extends EntidadeBase {
   Map<String, dynamic> toMap() {
     return {
       'idLocal': id,
-      'nome': nome,
-      'referencia': referencia,
+      'nome': _nome,
+      'referencia': _referencia,
       'caracteristicas': _caracteristicas,
     };
   }

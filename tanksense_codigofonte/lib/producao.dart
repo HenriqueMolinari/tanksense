@@ -98,9 +98,6 @@ class Producao extends EntidadeBase {
         _dataHora.isBefore(DateTime.now());
   }
 
-  void atualizarObservacoes(String novasObservacoes) {
-    print('📝 Observações atualizadas para: $novasObservacoes');
-  }
 
   void exibirMetricas() {
     print('📊 Métricas da Produção:');

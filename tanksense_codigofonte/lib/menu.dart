@@ -171,7 +171,7 @@ class Menu {
       // 🏢 CARREGAR EMPRESAS
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM empresa');
+            await dbConnection.query('SELECT * FROM empresa');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3 &&
@@ -188,7 +188,7 @@ class Menu {
       // 🏠 CARREGAR LOCAIS
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM local');
+            await dbConnection.query('SELECT * FROM local');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -207,7 +207,7 @@ class Menu {
       // ⚙️ CARREGAR DISPOSITIVOS
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM dispositivo');
+            await dbConnection.query('SELECT * FROM dispositivo');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -222,7 +222,7 @@ class Menu {
       // 📡 CARREGAR SENSORES
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM sensor');
+            await dbConnection.query('SELECT * FROM sensor');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -238,7 +238,7 @@ class Menu {
       // 🛢️ CARREGAR TANQUES
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM tanque');
+            await dbConnection.query('SELECT * FROM tanque');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 4) {
@@ -253,7 +253,7 @@ class Menu {
       // 👤 CARREGAR USUÁRIOS
       try {
         var resultados =
-            await dbConnection.connection!.query('SELECT * FROM usuario');
+            await dbConnection.query('SELECT * FROM usuario');
         for (var row in resultados) {
           var dados = row.toList();
           if (dados.length >= 3) {
@@ -333,7 +333,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO empresa (nome, cnpj) VALUES (?, ?)',
           [empresa.nome, empresa.cnpj],
         );
@@ -404,7 +404,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO local (nome, referencia, empresa_idEmpresa) VALUES (?, ?, ?)',
           [local.nome, local.referencia, empresaSelecionada.id],
         );
@@ -441,7 +441,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO dispositivo (modelo, status) VALUES (?, ?)',
           [dispositivo.modelo, dispositivo.status],
         );
@@ -505,7 +505,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO sensor (tipo, unidadeMedida, dispositivo_idDispositivo) VALUES (?, ?, ?)',
           [sensor.tipo, sensor.unidadeMedida, dispositivoSelecionado.id],
         );
@@ -602,7 +602,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO tanque (altura, volumeMax, volumeAtual, local_idLocal, dispositivo_idDispositivo) VALUES (?, ?, ?, ?, ?)',
           [
             tanque.altura,
@@ -695,7 +695,7 @@ class Menu {
 
     if (_conectado) {
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           'INSERT INTO usuario (nome, email, senhaLogin, perfil, dataCriacao, ultimoLogin, empresa_idEmpresa) VALUES (?, ?, ?, ?, ?, ?, ?)',
           [
             usuario.nome,
@@ -916,7 +916,7 @@ class Menu {
     final leituras = <Leitura>[];
 
     try {
-      final resultados = await dbConnection.connection!.query('''
+      final resultados = await dbConnection.query('''
         SELECT idLeitura, timestamp, distanciaCm, nivelCm, porcentagem, statusTanque 
         FROM leitura 
         ORDER BY timestamp DESC
@@ -993,7 +993,7 @@ class Menu {
       }
 
       try {
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           '''INSERT INTO leitura 
            (timestamp, distanciaCm, nivelCm, porcentagem, statusTanque, sensor_idSensor) 
            VALUES (?, ?, ?, ?, ?, ?)''',
@@ -1063,7 +1063,7 @@ class Menu {
           try {
             String dataFormatada = _formatarDataParaMySQL(producao.dataHora);
 
-            await dbConnection.connection!.query(
+            await dbConnection.query(
               'INSERT INTO producao (quantidade, timestamp, sensor_idSensor) VALUES (?, ?, ?)',
               [producao.quantidade, dataFormatada, sensorId],
             );
@@ -1117,7 +1117,7 @@ class Menu {
       try {
         String dataFormatada = _formatarDataParaMySQL(producao.dataHora);
 
-        await dbConnection.connection!.query(
+        await dbConnection.query(
           '''INSERT INTO producao 
            (quantidade, timestamp, sensor_idSensor) 
            VALUES (?, ?, ?)''',

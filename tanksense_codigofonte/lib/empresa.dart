@@ -2,13 +2,14 @@
 import 'entidade_base.dart';
 
 class Empresa extends EntidadeBase {
-  String nome;
-  String cnpj;
+  final String _nome;
+  final String _cnpj;
   final List<String> _departamentos = [];
 
-  Empresa(super.id, this.nome, this.cnpj);
+  Empresa(super.id, this._nome, this._cnpj);
 
-  // ENCAPSULAMENTO: Apenas para a lista de departamentos
+  String get nome => _nome;
+  String get cnpj => _cnpj;
   List<String> get departamentos => List.unmodifiable(_departamentos);
 
   @override
@@ -16,8 +17,8 @@ class Empresa extends EntidadeBase {
     print('🏢 DADOS DA EMPRESA');
     print('─' * 30);
     print('ID: $id');
-    print('Nome: $nome');
-    print('CNPJ: $cnpj');
+    print('Nome: $_nome');
+    print('CNPJ: $_cnpj');
     print('Departamentos: ${_departamentos.length}');
     print('Tipo: ${obterTipo()}');
     print('─' * 30);
@@ -49,8 +50,8 @@ class Empresa extends EntidadeBase {
   Map<String, dynamic> toMap() {
     return {
       'idEmpresa': id,
-      'nome': nome,
-      'cnpj': cnpj,
+      'nome': _nome,
+      'cnpj': _cnpj,
     };
   }
 }

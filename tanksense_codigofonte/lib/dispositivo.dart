@@ -3,7 +3,7 @@ import 'entidade_base.dart';
 
 class Dispositivo extends EntidadeBase {
   final String _modelo;
-  final String _status;
+  String _status;
   final List<String> _historicoStatus = [];
 
   Dispositivo(super.id, this._modelo, this._status) {
@@ -36,8 +36,9 @@ class Dispositivo extends EntidadeBase {
     } else if (novoStatus.isEmpty) {
       print('❌ Status não pode ser vazio');
     } else {
-      _historicoStatus.add("Alterado para: $novoStatus");
-      print('✅ Status atualizado de $_status para $novoStatus');
+      _historicoStatus.add("Alterado de $_status para: $novoStatus");
+      _status = novoStatus;
+      print('✅ Status atualizado para $novoStatus');
     }
   }
 

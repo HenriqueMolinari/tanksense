@@ -2,22 +2,21 @@ import 'package:mysql1/mysql1.dart';
 import 'database_config.dart';
 
 class DatabaseConnection {
-  final DatabaseConfig config;
+  final DatabaseConfig _config;
   MySqlConnection? _connection;
 
-  DatabaseConnection(this.config);
+  DatabaseConnection(this._config);
 
   Future<bool> connect() async {
     try {
       _connection = await MySqlConnection.connect(ConnectionSettings(
-        host: config.host,
-        port: config.porta,
-        user: config.usuario,
-        password: config.senha,
-        db: config.dbName,
+        host: _config.host,
+        port: _config.porta,
+        user: _config.usuario,
+        password: _config.senha,
+        db: _config.dbName,
       ));
 
-      // Testa a Conexao com um query simples
       try {
         await _connection!.query('SELECT 1');
         print('✅ Conexão estabelecida com Sucesso!');
@@ -37,5 +36,12 @@ class DatabaseConnection {
     print('🔌 Conexão encerrada!');
   }
 
-  MySqlConnection? get connection => _connection;
+  bool get isConnected => _connection != null;
+
+  Future<Results> query(String sql, [List<Object?>? values]) async {
+    if (_connection == null) {
+      throw Exception('Conexão não estabelecida');
+    }
+    return await _connection!.query(sql, values);
+  }
 }

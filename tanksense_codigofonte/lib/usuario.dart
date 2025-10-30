@@ -99,11 +99,7 @@ class Usuario extends EntidadeBase {
   }
 
   bool isAdministrador() {
-    if (_perfil.toLowerCase() == 'administrador') {
-      return true;
-    } else {
-      return false;
-    }
+    return _perfil.toLowerCase() == 'administrador';
   }
 
   bool isOperador() {
@@ -115,12 +111,8 @@ class Usuario extends EntidadeBase {
   }
 
   bool emailValido() {
-    bool validarEmail(String email) {
-      final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
-      return emailRegex.hasMatch(email);
-    }
-
-    return validarEmail(_email);
+    final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+');
+    return emailRegex.hasMatch(_email);
   }
 
   void exibirPermissoes() {
@@ -134,12 +126,8 @@ class Usuario extends EntidadeBase {
     return _permissoes.contains(permissao);
   }
 
-  void alterarSenha(String novaSenha) {
-    if (novaSenha.length >= 6) {
-      print('🔒 Senha alterada com sucesso!');
-    } else {
-      print('❌ Senha deve ter pelo menos 6 caracteres!');
-    }
+  bool validarSenha(String senha) {
+    return senha.length >= 6;
   }
 
   String _formatarData(DateTime data) {
